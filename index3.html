@@ -106,7 +106,7 @@ input{font:inherit;color:inherit}
 
 /* board */
 .boardwrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 12px 4px;min-height:0}
-.board{position:relative;width:min(100%,calc((100dvh - 480px) * 6 / 7));max-width:456px;aspect-ratio:6/7;background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:6px;touch-action:none}
+.board{position:relative;width:240px;height:280px;flex:none;background:var(--card);border-radius:22px;box-shadow:var(--shadow);padding:6px;touch-action:none}
 .cells{position:absolute;inset:6px;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(7,1fr);gap:4px}
 .cell{border-radius:12px;background:var(--card2);position:relative}
 .cell.lock{background:repeating-linear-gradient(135deg,#DCEFE3 0 6px,#CFE8D8 6px 12px)}
@@ -252,7 +252,7 @@ input{font:inherit;color:inherit}
 .toggle.on{background:var(--mint-deep)}.toggle.on::after{left:23px}
 .text-in{width:100%;border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;text-align:center;font-weight:800;font-size:16px;margin:8px 0 12px}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}}
-@media (max-height:720px){.front{height:160px}.board{width:min(100%,calc((100dvh - 440px) * 6 / 7))}}
+@media (max-height:720px){.front{height:150px}}
 </style>
 </head>
 <body>
@@ -681,6 +681,8 @@ function genOrder(id){
     let c = (Math.random() < .5 ? pick(who.likes.filter(l => chains.some(x => x.id === l))) : null) || pick(chains).id;
     let t = ri(lo, hi); if (t >= 6 && Math.random() < .5) t--;
     if (needs.some(n => n.c === c)) { t = clamp(t + 1, 2, 7); }
+    const taken = G.orders.filter(Boolean).flatMap(o => o.needs).some(nd => nd.c === c && nd.t === t);
+    if (taken) t = t > lo ? t - 1 : Math.min(hi, t + 1);
     const n = t <= 3 && G.level >= 3 && Math.random() < .3 ? 2 : 1;
     if (!needs.some(n2 => n2.c === c && n2.t === t)) needs.push({ c, t, n });
   }
@@ -944,7 +946,13 @@ let selected = -1;
 function cellRect(i){ const cells = $("#cells"); const r = cells.getBoundingClientRect(); const cw = (r.width - 4 * (COLS - 1)) / COLS, ch = (r.height - 4 * (ROWS - 1)) / ROWS; return { x: colOf(i) * (cw + 4), y: rowOf(i) * (ch + 4), w: cw, h: ch }; }
 function placeItem(el, i){ const p = cellRect(i); el.style.left = 6 + p.x + "px"; el.style.top = 6 + p.y + "px"; el.style.width = p.w + "px"; el.style.height = p.h + "px"; }
 function itemEl(i){ return $(`.item[data-i="${i}"]`); }
+function sizeBoard(){
+  const w = $(".boardwrap"), b = $("#board"); const r = w.getBoundingClientRect(); if (!r.height) return;
+  const size = Math.max(150, Math.min(r.width - 4, (r.height - 8) * 6 / 7, 456));
+  b.style.width = size + "px"; b.style.height = (size * 7 / 6) + "px";
+}
 function renderBoard(){
+  sizeBoard();
   const cells = $("#cells"); const wanted = wantedKeys();
   if (cells.children.length !== COLS * ROWS) cells.innerHTML = Array.from({ length: COLS * ROWS }, (_, i) => `<div class="cell" data-i="${i}"></div>`).join("");
   [...cells.children].forEach((c, i) => { c.className = "cell" + (unlocked(i) ? "" : " lock") + (G.tut === 1 && G.board[i] && G.board[i].c === "planter" ? " hint" : ""); });
@@ -1169,6 +1177,7 @@ setInterval(() => {
 }, 1000);
 setInterval(() => { if (G && $("#title").hidden) { renderFront(); if (selected < 0) renderInfobar(); } }, 60000);
 window.addEventListener("resize", () => { if (G) renderBoard(); });
+if (window.ResizeObserver) new ResizeObserver(() => { if (G && $("#title").hidden) renderBoard(); }).observe($(".boardwrap"));
 document.addEventListener("visibilitychange", () => { if (document.hidden && G) { G.lastSeen = now(); store.set(SAVE_KEY, G); } else if (G && $("#title").hidden){ regenPlanters(); renderBoard(); } });
 window.addEventListener("beforeunload", () => { if (G){ G.lastSeen = now(); store.set(SAVE_KEY, G); } });
 
