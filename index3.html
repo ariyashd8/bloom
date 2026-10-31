@@ -487,148 +487,127 @@ function storefrontSVG(d, opts = {}){
 }
 </script>
 <script>
-/* ---------- SVG art: characters (real animal silhouettes) ---------- */
-const OL = "#5B4450";
-const ST = `stroke="${OL}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"`;
+/* ---------- SVG art: characters (soft hand-drawn style) ---------- */
+const OL = "#4A3A40";
+const ST = `stroke="${OL}" stroke-width="2.3" stroke-linejoin="round" stroke-linecap="round"`;
 const CRITTERS = { duck: 1, bear: 1, fox: 1, frog: 1, bird: 1, moth: 1, cat: 1, bunny: 1 };
-function eyes(pts, mood, r = 2.6){
-  return pts.map(([x, y]) => mood === "happy"
-    ? `<path d="M${x - 2.8} ${y + .6} q2.8 -3.6 5.6 0" fill="none" stroke="${OL}" stroke-width="1.9" stroke-linecap="round"/>`
-    : mood === "sleepy"
-    ? `<path d="M${x - 2.8} ${y} q2.8 2.4 5.6 0" fill="none" stroke="${OL}" stroke-width="1.8" stroke-linecap="round"/>`
-    : `<ellipse cx="${x}" cy="${y}" rx="${r * .85}" ry="${r}" fill="${OL}"/><circle cx="${x + r * .35}" cy="${y - r * .4}" r="${r * .38}" fill="#fff"/>`).join("");
+let _cid = 0;
+/* one silhouette, interior details clipped so nothing crosses the outline */
+function blob(d, fill, inner = ""){
+  const id = "cl" + (++_cid);
+  return `<clipPath id="${id}"><path d="${d}"/></clipPath><path d="${d}" fill="${fill}"/><g clip-path="url(#${id})">${inner}</g><path d="${d}" fill="none" ${ST}/>`;
 }
-const blush = pts => pts.map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="3.2" ry="2" fill="#F7A1BB" opacity=".75"/>`).join("");
+function eyes(pts, mood){
+  return pts.map(([x, y]) => mood === "happy"
+    ? `<path d="M${x - 2.2} ${y + .8} q2.2 -2.8 4.4 0" fill="none" stroke="${OL}" stroke-width="1.8" stroke-linecap="round"/>`
+    : mood === "sleepy"
+    ? `<path d="M${x - 2.2} ${y} q2.2 2 4.4 0" fill="none" stroke="${OL}" stroke-width="1.7" stroke-linecap="round"/>`
+    : `<ellipse cx="${x}" cy="${y}" rx="1.7" ry="2.2" fill="${OL}"/><circle cx="${x + .6}" cy="${y - .8}" r=".6" fill="#fff"/>`).join("");
+}
+const mouth = (x, y) => `<path d="M${x} ${y - 1.3} v1.3 M${x - 1.8} ${y + .3} q.9 1.2 1.8 0 q.9 1.2 1.8 0" fill="none" stroke="${OL}" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`;
+const blush = pts => pts.map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2.8" ry="1.7" fill="#F2A7BC" opacity=".6"/>`).join("");
+const WOB = `<defs><filter id="wob" x="-6%" y="-6%" width="112%" height="112%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="7"/><feDisplacementMap in="SourceGraphic" scale="1.8"/></filter></defs>`;
 
 function bunnyArt(mood, o){
-  const fur = "#FBF1E8", pink = "#F6B3C6";
-  let s = `<circle cx="49" cy="57" r="5" fill="#fff" ${ST}/>`;
-  s += `<ellipse cx="21" cy="65.4" rx="8.5" ry="3.8" fill="${fur}" ${ST}/><ellipse cx="43" cy="65.4" rx="8.5" ry="3.8" fill="${fur}" ${ST}/>`;
-  s += `<path d="M32 34 C19 34 14.5 48 15.5 58 C16.5 66 24 66.5 32 66.5 C40 66.5 47.5 66 48.5 58 C49.5 48 45 34 32 34Z" fill="${fur}" ${ST}/>`;
-  s += `<ellipse cx="32" cy="54" rx="9" ry="9.5" fill="#fff"/>`;
-  s += `<ellipse cx="22.5" cy="50" rx="3.4" ry="4.4" fill="${fur}" ${ST} transform="rotate(18 22.5 50)"/><ellipse cx="41.5" cy="50" rx="3.4" ry="4.4" fill="${fur}" ${ST} transform="rotate(-18 41.5 50)"/>`;
-  s += `<g transform="rotate(-8 25 18)"><ellipse cx="25" cy="13" rx="4.8" ry="11" fill="${fur}" ${ST}/><ellipse cx="25" cy="14" rx="2.2" ry="7.5" fill="${pink}"/></g>`;
-  s += `<g transform="rotate(16 39 18)"><ellipse cx="39" cy="13" rx="4.8" ry="11" fill="${fur}" ${ST}/><ellipse cx="39" cy="14" rx="2.2" ry="7.5" fill="${pink}"/></g>`;
-  s += `<ellipse cx="32" cy="29.5" rx="15" ry="12.5" fill="${fur}" ${ST}/>`;
-  s += eyes([[26, 29], [38, 29]], mood) + blush([[21.5, 33.5], [42.5, 33.5]]);
-  s += `<path d="M30.6 32.2 h2.8 l-1.4 1.6z" fill="#E77F9C" stroke="#E77F9C" stroke-width="1" stroke-linejoin="round"/><path d="M29.4 35 q1.3 1.4 2.6 0 q1.3 1.4 2.6 0" fill="none" stroke="${OL}" stroke-width="1.3" stroke-linecap="round"/>`;
-  // outfits
-  if (o.body === "apron") s += `<path d="M24 44 h16 l2 18 q-10 4 -20 0z" fill="#D7B48F" ${ST}/><path d="M24 44 q8 -4 16 0" fill="none" stroke="#B28B66" stroke-width="2"/><rect x="28" y="52" width="8" height="5" rx="1.5" fill="#C29C76"/>`;
-  if (o.body === "dress") s += `<path d="M22 41 q10 -3 20 0 l6 23 q-16 5 -32 0z" fill="#F9C5D5" ${ST}/><circle cx="27" cy="52" r="1.4" fill="#fff"/><circle cx="36" cy="57" r="1.4" fill="#fff"/><circle cx="40" cy="48" r="1.4" fill="#fff"/><circle cx="24" cy="60" r="1.4" fill="#fff"/>`;
-  if (o.body === "sweater") s += `<path d="M19 46 q13 -8 26 0 l2 14 q-15 5 -30 0z" fill="#BFE8D8" ${ST}/><path d="M21 56 h22" stroke="#7DBA8F" stroke-width="1.4" stroke-dasharray="2 2"/><ellipse cx="22.5" cy="50" rx="3.4" ry="4.4" fill="${fur}" ${ST} transform="rotate(18 22.5 50)"/><ellipse cx="41.5" cy="50" rx="3.4" ry="4.4" fill="${fur}" ${ST} transform="rotate(-18 41.5 50)"/>`;
-  if (o.neck === "scarf") s += `<path d="M20 39 q12 5 24 0 l1 4.5 q-13 5 -26 0z" fill="#F28DAA" ${ST}/><path d="M38 42 l3 11 l5 -1.5 l-3 -10z" fill="#D96A8C" ${ST}/>`;
-  if (o.neck === "pearls") s += `<path d="M22 40 q10 6 20 0" fill="none" stroke="#fff" stroke-width="3.2" stroke-dasharray=".1 3.6" stroke-linecap="round"/><path d="M22 40 q10 6 20 0" fill="none" stroke="#E9DDE3" stroke-width="1" stroke-dasharray=".1 3.6" stroke-linecap="round"/>`;
-  if (o.neck === "bowtie") s += `<path d="M32 42 l-7 -3.5 v7z M32 42 l7 -3.5 v7z" fill="#7E62C9" ${ST}/><circle cx="32" cy="42" r="1.8" fill="#5D45A3"/>`;
-  if (o.head === "bow") s += `<g transform="translate(41 19) rotate(18)"><path d="M0 0 q-8 -6 -8 1 q0 7 8 1z M0 0 q8 -6 8 1 q0 7 -8 1z" fill="#F28DAA" ${ST}/><circle cx="0" cy=".6" r="2.2" fill="#D96A8C" ${ST}/></g>`;
-  if (o.head === "beret") s += `<path d="M17 21 q14 -12 30 -2 q-14 5 -30 2z" fill="#D96A8C" ${ST}/><path d="M33 13 v-2.5" stroke="${OL}" stroke-width="2" stroke-linecap="round"/>`;
-  if (o.head === "crown") s += [[20, 21, "#FFC1D3"], [25.5, 18, "#FFE9A8"], [32, 17, "#C7A4DE"], [38.5, 18, "#FFC1D3"], [44, 21, "#BFE8D8"]].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="3.4" fill="${c}" ${ST}/><circle cx="${x}" cy="${y}" r="1.1" fill="#fff"/>`).join("");
-  if (o.head === "glasses") s += `<path d="M26 25 l1.4 2.8 3 .4 -2.2 2.1 .5 3 -2.7 -1.4 -2.7 1.4 .5 -3 -2.2 -2.1 3 -.4z M38 25 l1.4 2.8 3 .4 -2.2 2.1 .5 3 -2.7 -1.4 -2.7 1.4 .5 -3 -2.2 -2.1 3 -.4z" fill="#FFE07A" ${ST}/><path d="M30 29 h4" stroke="${OL}" stroke-width="1.6"/>`;
-  if (o.head === "sunhat") s += `<ellipse cx="32" cy="20" rx="22" ry="4.6" fill="#EBCB8B" ${ST}/><path d="M20 20 q0 -11 12 -11 q12 0 12 11z" fill="#F2DBA0" ${ST}/><path d="M20.5 17 h23" stroke="#F28DAA" stroke-width="3"/>`;
+  const fur = "#F6EEE4", pk = "#EFB4C3", sh = "#E6D9CB";
+  let s = "";
+  s += `<path d="M24 28 C19 18 18 6 22 4 C27 2 30 14 30 26Z" fill="${fur}" ${ST}/><path d="M24.5 24 C22 16 22 9 23.5 8 C26 8 27.5 16 27.5 23Z" fill="${pk}"/>`;
+  s += `<path d="M38 26 C39 14 44 4 48 6 C52 9 47 20 42 28Z" fill="${fur}" ${ST}/><path d="M40 23 C41 15 44.5 9 46.5 10 C48 12 45 19 42 24Z" fill="${pk}"/>`;
+  s += `<circle cx="50" cy="58" r="5" fill="#fff" ${ST}/>`;
+  const body = "M32 22 C44 22 51 32 51 45 C51 58 45 66 32 66 C19 66 13 58 13 45 C13 32 20 22 32 22Z";
+  s += blob(body, fur, `<ellipse cx="32" cy="58" rx="13" ry="10" fill="#FFFCF8"/><ellipse cx="45" cy="34" rx="7" ry="5" fill="${sh}" opacity=".55"/>`);
+  s += `<path d="M18 64 q4 -6 9 0 M37 64 q5 -6 9 0" fill="${fur}" ${ST}/>`;
+  s += eyes([[25.5, 37], [38.5, 37]], mood) + blush([[21, 42], [43, 42]]) + mouth(32, 41.5);
+  if (o.body === "apron") s += `<path d="M23 48 h18 l2 15 q-11 3 -22 0z" fill="#D7B48F" ${ST}/><rect x="28.5" y="54" width="7" height="4.5" rx="1.5" fill="#C29C76"/>`;
+  if (o.body === "dress") s += `<path d="M20 49 q12 -3 24 0 l5 14 q-17 5 -34 0z" fill="#F9C5D5" ${ST}/><circle cx="26" cy="56" r="1.3" fill="#fff"/><circle cx="35" cy="59" r="1.3" fill="#fff"/><circle cx="40" cy="53" r="1.3" fill="#fff"/>`;
+  if (o.body === "sweater") s += `<path d="M16 52 q16 -7 32 0 l1 9 q-17 5 -34 0z" fill="#BFE8D8" ${ST}/><path d="M18 57 h28" stroke="#7DBA8F" stroke-width="1.3" stroke-dasharray="2 2"/>`;
+  if (o.neck === "scarf") s += `<path d="M18 46 q14 5 28 0 l.5 4.5 q-14.5 5 -29 0z" fill="#F28DAA" ${ST}/><path d="M38 49 l2.5 10 l5 -1.5 l-3 -9z" fill="#D96A8C" ${ST}/>`;
+  if (o.neck === "pearls") s += `<path d="M20 47 q12 6 24 0" fill="none" stroke="#fff" stroke-width="3.4" stroke-dasharray=".1 3.8" stroke-linecap="round"/>`;
+  if (o.neck === "bowtie") s += `<path d="M32 48 l-6.5 -3.5 v7z M32 48 l6.5 -3.5 v7z" fill="#7E62C9" ${ST}/>`;
+  if (o.head === "bow") s += `<g transform="translate(42 26) rotate(15)"><path d="M0 0 q-7 -6 -7 1 q0 6 7 1z M0 0 q7 -6 7 1 q0 6 -7 1z" fill="#F28DAA" ${ST}/><circle cx="0" cy=".6" r="2" fill="#D96A8C"/></g>`;
+  if (o.head === "beret") s += `<path d="M17 28 q14 -12 30 -2 q-14 5 -30 2z" fill="#D96A8C" ${ST}/>`;
+  if (o.head === "crown") s += [[19, 29, "#FFC1D3"], [25, 25, "#FFE9A8"], [32, 23.5, "#C7A4DE"], [39, 25, "#FFC1D3"], [45, 29, "#BFE8D8"]].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="3.2" fill="${c}" ${ST}/>`).join("");
+  if (o.head === "glasses") s += `<circle cx="25.5" cy="37" r="4.6" fill="#FFE9A8" fill-opacity=".45" ${ST}/><circle cx="38.5" cy="37" r="4.6" fill="#FFE9A8" fill-opacity=".45" ${ST}/><path d="M30 37 h4" stroke="${OL}" stroke-width="1.8"/>`;
+  if (o.head === "sunhat") s += `<ellipse cx="32" cy="27" rx="21" ry="4.4" fill="#EBCB8B" ${ST}/><path d="M21 27 q0 -10 11 -10 q11 0 11 10z" fill="#F2DBA0" ${ST}/><path d="M21.5 24 h21" stroke="#F28DAA" stroke-width="2.6"/>`;
   return s;
 }
 function duckArt(mood){
-  const y = "#FFE27A", y2 = "#F5C542", or = "#F59A4F";
-  let s = `<path d="M27 60 v5 M35 60 v5" stroke="${or}" stroke-width="2.4" stroke-linecap="round"/><path d="M21 67.5 l6 -3.5 l5 3.5z M30 67.5 l5 -3.5 l6 3.5z" fill="${or}" ${ST}/>`;
-  s += `<path d="M17 33 C16 40 19 45 24 47 L35 45 C31 41 30 36 30 31Z" fill="${y}" ${ST}/>`;
-  s += `<path d="M46 45 C52 40 56 34 55 29 C51 33 47 36 42 38Z" fill="${y2}" ${ST}/>`;
-  s += `<path d="M17 48 C17 39 29 37 39 38 C50 39 55 46 53 54 C51 62 41 64 32 63 C22 62 17 56 17 48Z" fill="${y}" ${ST}/>`;
-  s += `<path d="M29 46 C36 42 46 44 48 51 C44 57 34 57 29 52Z" fill="${y2}" ${ST}/><path d="M36 50 q5 1 8 4 M34 53 q5 1 8 3" fill="none" stroke="#E0A92E" stroke-width="1.1" stroke-linecap="round"/>`;
-  s += `<circle cx="24" cy="25" r="12.5" fill="${y}" ${ST}/><path d="M24 12.6 q-3 -5 2 -7 q-1 3 1.6 5.2" fill="${y}" ${ST}/>`;
-  s += `<path d="M13.5 25.5 C7 25 3.5 27.8 4.2 30 C5.4 32.6 12 32.8 15.5 30.6Z" fill="${or}" ${ST}/><path d="M5 29.6 q5 .8 10 -.4" fill="none" stroke="#D97A33" stroke-width="1.1"/>`;
-  s += eyes([[21, 22.5]], mood) + blush([[27, 29]]);
+  const y = "#FBE089", y2 = "#F0C95C", or = "#F2A35E";
+  let s = `<path d="M25 60 v6 M35 60 v6" stroke="${or}" stroke-width="2.6" stroke-linecap="round"/><path d="M20 67 q5 -4 9 0z M30 67 q5 -4 9 0z" fill="${or}" ${ST}/>`;
+  s += `<path d="M16 28 C10 27 5 29 5.5 31.5 C6.5 34 12 34.5 17 32.5Z" fill="${or}" ${ST}/>`;
+  const d = "M15 29 C15 19 22 15 28 16 C35 17 37 25 34 33 C41 34 51 33 57 27 C59 36 57 47 50 55 C43 62 29 63 21 59 C13 55 12 45 17 39 C15.5 36 15 33 15 29Z";
+  s += blob(d, y, `<path d="M28 44 C36 40 47 42 50 49 C45 55 35 55 28 50Z" fill="${y2}"/><path d="M30 47 q8 -3 16 1" fill="none" stroke="${OL}" stroke-width="1.4" stroke-linecap="round" opacity=".5"/>`);
+  s += `<path d="M25 16 q-2 -5 2 -7 q0 3 2 5" fill="none" ${ST}/>`;
+  s += eyes([[23, 24]], mood) + blush([[27, 29.5]]);
   return s;
 }
 function birdArt(mood){
-  const b = "#C7A4DE", b2 = "#A98BD6", or = "#F59A4F";
-  let s = `<path d="M40 49 L58 42 L56 48 L61 52 L42 56Z" fill="${b2}" ${ST}/>`;
-  s += `<path d="M27 58 l-1 8 M34 58 l1 8 M22.5 67 h7 M31.5 67 h7" stroke="${or}" stroke-width="1.8" stroke-linecap="round"/>`;
-  s += `<path d="M14 37 C14 25 23 19 31 20 C43 21 48 35 46 45 C44 55 37 60 28 60 C19 60 14 49 14 37Z" fill="${b}" ${ST}/>`;
-  s += `<ellipse cx="25" cy="47" rx="9.5" ry="10" fill="#FBF3FF"/>`;
-  s += `<path d="M29 35 C37 32 46 38 46 47 C40 51 32 49 28 43Z" fill="${b2}" ${ST}/><path d="M34 40 q5 1 8 5 M33 44 q4 1 7 3" fill="none" stroke="#8E70CF" stroke-width="1.1" stroke-linecap="round"/>`;
-  s += `<path d="M26 20.5 q-1.5 -6 4 -8.5 q-1 4 2.4 7" fill="${b2}" ${ST}/>`;
-  s += `<path d="M15 31 L6.5 33.5 L15 36.5Z" fill="${or}" ${ST}/>`;
-  s += eyes([[21, 30]], mood) + blush([[22, 37]]);
+  const b = "#CDB4E3", b2 = "#AF95D3", or = "#F2A35E";
+  let s = `<path d="M40 48 L58 41 L57 47.5 L61 52 L42 56Z" fill="${b2}" ${ST}/>`;
+  s += `<path d="M27 58 l-1 8 M34 58 l1 8 M22.5 67 h7 M31.5 67 h7" stroke="${or}" stroke-width="2" stroke-linecap="round"/>`;
+  s += `<path d="M17 31 L8 33.5 L17 36.5Z" fill="${or}" ${ST}/>`;
+  const d = "M15 37 C15 25 23 19 31 20 C43 21 48 35 46 45 C44 55 37 60 28 60 C19 60 15 49 15 37Z";
+  s += blob(d, b, `<ellipse cx="25" cy="49" rx="10" ry="10" fill="#FAF4FF"/><path d="M29 35 C37 32 47 38 47 48 C40 52 32 49 28 43Z" fill="${b2}"/>`);
+  s += `<path d="M27 20.5 q-1 -5 3 -7 q0 3 2 6" fill="none" ${ST}/>`;
+  s += eyes([[23, 30]], mood) + blush([[24, 36]]);
   return s;
 }
 function foxArt(mood){
-  const f = "#F2985A", f2 = "#D9773A", w = "#FFF6EE", dk = "#6B3F2C";
-  let s = `<path d="M40 66 C56 67 63 55 59 42 C56 33 48 32 47 40 C51 47 50 57 40 60Z" fill="${f}" ${ST}/><path d="M59 42 C56 33 48 32 47 40 C50 42 55 43 59 42Z" fill="${w}" ${ST}/>`;
-  s += `<path d="M22 40 C15 50 15 61 19 67 L45 67 C49 60 47 48 41 40Z" fill="${f}" ${ST}/>`;
-  s += `<path d="M25 42 C22 52 26 60 32 62 C37 56 37 48 35 42Z" fill="${w}"/>`;
-  s += `<rect x="23" y="55" width="5.5" height="12" rx="2.6" fill="${dk}" ${ST}/><rect x="32" y="55" width="5.5" height="12" rx="2.6" fill="${dk}" ${ST}/>`;
-  s += `<path d="M23 21 L19 5 L31 14Z" fill="${f}" ${ST}/><path d="M23.5 18 L21.5 9.5 L27.5 14Z" fill="${dk}"/>`;
-  s += `<path d="M35 14 L44 4 L44.5 21Z" fill="${f}" ${ST}/><path d="M37.5 14.5 L42.5 8.5 L42.5 17Z" fill="${dk}"/>`;
-  s += `<ellipse cx="33" cy="28" rx="12.5" ry="11.5" fill="${f}" ${ST}/>`;
-  s += `<path d="M24 26 C16 28 9 31 7 33.5 C10 37.5 19 38.5 28 36Z" fill="${f}" ${ST}/><path d="M7.6 34.6 C11 37.6 19 38.4 27.6 35.6 L26.5 32 C20 34 14 34.6 7.6 34.6Z" fill="${w}"/>`;
-  s += `<path d="M36 36 C40 38 44 36 45 31 C42 33 39 34 36 33Z" fill="${w}"/>`;
-  s += `<ellipse cx="7.4" cy="33.4" rx="2.2" ry="1.8" fill="${OL}"/>`;
-  s += eyes([[26, 26], [36, 25]], mood) + blush([[39, 31]]);
+  const f = "#EE9F67", w = "#FFF7EF", dk = "#7A4A36";
+  let s = "";
+  const tail = "M42 66 C57 67 63 55 59 43 C56 35 49 35 48 42 C51 49 50 58 42 61Z";
+  s += blob(tail, f, `<path d="M54 30 C62 34 64 44 60 47 C55 47 50 43 48 38Z" fill="${w}"/>`);
+  s += `<path d="M18 20 L17 5 L29 14Z" fill="${f}" ${ST}/><path d="M20 16 L19.5 9.5 L25 14Z" fill="${dk}"/><path d="M46 20 L47 5 L35 14Z" fill="${f}" ${ST}/><path d="M44 16 L44.5 9.5 L39 14Z" fill="${dk}"/>`;
+  const body = "M21 42 C16 50 16 61 19 66.5 L45 66.5 C48 61 48 50 43 42Z";
+  s += blob(body, f, `<path d="M26 42 C24 52 27 60 32 63 C37 60 40 52 38 42Z" fill="${w}"/><rect x="22" y="60" width="7" height="10" rx="3.5" fill="${dk}"/><rect x="35" y="60" width="7" height="10" rx="3.5" fill="${dk}"/>`);
+  const head = "M32 13 C41 13 46 19 47.5 25 C51 27 54 30 55 32 C50 34 46 37 42 41 C38 44.5 34.5 46 32 46 C29.5 46 26 44.5 22 41 C18 37 14 34 9 32 C10 30 13 27 16.5 25 C18 19 23 13 32 13Z";
+  s += blob(head, f, `<path d="M8 32 C17 31 26 35 32 47 C38 35 47 31 56 32 L56 50 L8 50Z" fill="${w}"/>`);
+  s += `<ellipse cx="32" cy="41.5" rx="2.4" ry="1.8" fill="${OL}"/><path d="M30.2 44 q.9 1 1.8 0 q.9 1 1.8 0" fill="none" stroke="${OL}" stroke-width="1.3" stroke-linecap="round"/>`;
+  s += eyes([[25, 30], [39, 30]], mood) + blush([[21.5, 35.5], [42.5, 35.5]]);
   return s;
 }
 function frogArt(mood){
-  const g = "#9DD6A5", g2 = "#6FAE84", bl = "#E4F6E2";
-  let s = `<ellipse cx="13" cy="58" rx="10" ry="7.5" fill="${g2}" ${ST}/><ellipse cx="51" cy="58" rx="10" ry="7.5" fill="${g2}" ${ST}/>`;
-  s += [[6, 65], [10, 66.5], [14, 66], [50, 66], [54, 66.5], [58, 65]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="${g2}" ${ST}/>`).join("");
-  s += `<path d="M13 52 C13 39 22 33 32 33 C42 33 51 39 51 52 C51 62 43 66 32 66 C21 66 13 62 13 52Z" fill="${g}" ${ST}/>`;
-  s += `<ellipse cx="32" cy="55" rx="12" ry="9" fill="${bl}"/>`;
-  s += `<path d="M22 50 q-2 8 0 14 M42 50 q2 8 0 14" fill="none" stroke="${OL}" stroke-width="1.4" stroke-linecap="round"/>`;
-  s += [[19, 65], [22, 66], [25, 65], [39, 65], [42, 66], [45, 65]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="${g}" ${ST}/>`).join("");
-  s += `<path d="M8 36 C8 25 19 21 32 21 C45 21 56 25 56 36 C56 44 46 46.5 32 46.5 C18 46.5 8 44 8 36Z" fill="${g}" ${ST}/>`;
-  s += `<circle cx="20" cy="21" r="8" fill="${g}" ${ST}/><circle cx="44" cy="21" r="8" fill="${g}" ${ST}/>`;
-  if (mood === "dot") s += `<circle cx="20" cy="21" r="5.4" fill="#fff"/><circle cx="44" cy="21" r="5.4" fill="#fff"/><circle cx="21" cy="21.5" r="3" fill="${OL}"/><circle cx="45" cy="21.5" r="3" fill="${OL}"/><circle cx="22" cy="20.3" r="1" fill="#fff"/><circle cx="46" cy="20.3" r="1" fill="#fff"/>`;
-  else s += eyes([[20, 21], [44, 21]], mood);
-  s += `<circle cx="30" cy="29" r="1.6" fill="${g2}"/><circle cx="36" cy="27.5" r="1.2" fill="${g2}"/><circle cx="27" cy="27" r="1" fill="${g2}"/>`;
-  s += `<path d="M19 36 Q32 45 45 36" fill="none" stroke="${OL}" stroke-width="1.7" stroke-linecap="round"/>` + blush([[14, 38], [50, 38]]);
+  const g = "#A6D9AA", g2 = "#7DB88C", bl = "#E6F5E0";
+  let s = [[10, 65], [15, 66.5], [49, 66.5], [54, 65]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="3.6" ry="2.4" fill="${g2}" ${ST}/>`).join("");
+  const d = "M8 45 C6 35 12 27 18 25 C15 16 27 12 28.5 21 C30.5 20.3 33.5 20.3 35.5 21 C37 12 49 16 46 25 C52 27 58 35 56 45 C56 59 46 66.5 32 66.5 C18 66.5 8 59 8 45Z";
+  s += blob(d, g, `<ellipse cx="32" cy="57" rx="15" ry="10" fill="${bl}"/><circle cx="30" cy="30" r="1.7" fill="${g2}"/><circle cx="36" cy="28.5" r="1.2" fill="${g2}"/><circle cx="12" cy="44" r="1.6" fill="${g2}"/><circle cx="51" cy="46" r="1.9" fill="${g2}"/><path d="M14 52 q4 4 2 12 M50 52 q-4 4 -2 12" fill="none" stroke="${OL}" stroke-width="1.5" stroke-linecap="round" opacity=".55"/>`);
+  s += mood === "dot" ? eyes([[22, 22], [42, 22]], "dot") : eyes([[22, 22], [42, 22]], mood);
+  s += `<path d="M24 36 Q32 41 40 36" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>` + blush([[17, 36], [47, 36]]);
   return s;
 }
 function bearArt(mood){
-  const b = "#C9A27E", b2 = "#A47B57", lt = "#EBD5BC";
-  let s = `<circle cx="18" cy="14" r="6.5" fill="${b}" ${ST}/><circle cx="46" cy="14" r="6.5" fill="${b}" ${ST}/><circle cx="18" cy="14" r="3.2" fill="${lt}"/><circle cx="46" cy="14" r="3.2" fill="${lt}"/>`;
-  s += `<path d="M14 51 C14 39 22 35 32 35 C42 35 50 39 50 51 C50 62 44 67 32 67 C20 67 14 62 14 51Z" fill="${b}" ${ST}/>`;
-  s += `<ellipse cx="32" cy="54" rx="10" ry="10" fill="${lt}"/>`;
-  s += `<path d="M22 44 h20 l2 16 q-12 4 -24 0z" fill="#FFF8F1" ${ST}/><path d="M22 44 q10 -3 20 0" fill="none" stroke="#F28DAA" stroke-width="2"/><rect x="28" y="51" width="8" height="5" rx="1.5" fill="#F9C5D5"/>`;
-  s += `<ellipse cx="16" cy="50" rx="5" ry="9" fill="${b}" ${ST} transform="rotate(14 16 50)"/><ellipse cx="48" cy="50" rx="5" ry="9" fill="${b}" ${ST} transform="rotate(-14 48 50)"/>`;
-  s += `<ellipse cx="22" cy="65" rx="7.5" ry="4" fill="${b}" ${ST}/><ellipse cx="42" cy="65" rx="7.5" ry="4" fill="${b}" ${ST}/><ellipse cx="22" cy="65" rx="3.5" ry="2" fill="${b2}"/><ellipse cx="42" cy="65" rx="3.5" ry="2" fill="${b2}"/>`;
-  s += `<ellipse cx="32" cy="26" rx="16" ry="14" fill="${b}" ${ST}/>`;
-  s += `<ellipse cx="32" cy="32" rx="7.5" ry="5.5" fill="${lt}" ${ST}/><ellipse cx="32" cy="30" rx="2.8" ry="1.9" fill="${OL}"/><path d="M32 32 v2 M29.6 34.4 q2.4 1.6 4.8 0" fill="none" stroke="${OL}" stroke-width="1.3" stroke-linecap="round"/>`;
-  s += eyes([[25, 24], [39, 24]], mood) + blush([[21, 30], [43, 30]]);
+  const b = "#C9A27E", lt = "#ECD8C0";
+  let s = `<circle cx="19" cy="17" r="6" fill="${b}" ${ST}/><circle cx="19" cy="17" r="2.8" fill="${lt}"/><circle cx="45" cy="17" r="6" fill="${b}" ${ST}/><circle cx="45" cy="17" r="2.8" fill="${lt}"/>`;
+  const d = "M14 34 C14 22 22 15 32 15 C42 15 50 22 50 34 C50 38 49 40 47.5 42 C52 48 53 58 49.5 63.5 C46 66.5 38 66.5 32 66.5 C26 66.5 18 66.5 14.5 63.5 C11 58 12 48 16.5 42 C15 40 14 38 14 34Z";
+  s += blob(d, b, `<ellipse cx="32" cy="58" rx="12" ry="9" fill="${lt}"/><path d="M22 46 h20 l2 14 q-12 4 -24 0z" fill="#FFF8F1"/><path d="M22 46 q10 -3 20 0" fill="none" stroke="#F28DAA" stroke-width="2"/><rect x="28.5" y="52" width="7" height="4.5" rx="1.5" fill="#F9C5D5"/><ellipse cx="32" cy="34.5" rx="7" ry="5" fill="${lt}"/><path d="M17 48 q-2 8 3 13 M47 48 q2 8 -3 13" fill="none" stroke="${OL}" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>`);
+  s += `<ellipse cx="32" cy="32.6" rx="2.6" ry="1.8" fill="${OL}"/><path d="M30 35.6 q1 1.1 2 0 q1 1.1 2 0" fill="none" stroke="${OL}" stroke-width="1.3" stroke-linecap="round"/>`;
+  s += eyes([[25, 28], [39, 28]], mood) + blush([[20.5, 33], [43.5, 33]]);
   return s;
 }
 function catArt(mood){
-  const c = "#A8B2C4", c2 = "#7E899E", lt = "#E7EBF2", pk = "#F6B3C6";
-  let s = `<path d="M44 65 C57 65 59 52 55 44 C53 40 50 41 51 45 C54 53 50 60 42 60Z" fill="${c}" ${ST}/><path d="M54 48 l-3 1 M55 53 l-3.5 .5" stroke="${c2}" stroke-width="1.6" stroke-linecap="round"/>`;
-  s += `<path d="M19 67 C17 55 20 45 26 38 L39 38 C46 46 48 56 46 67Z" fill="${c}" ${ST}/>`;
-  s += `<path d="M27 40 C25 48 27 56 32 58 C37 56 38 48 36 40Z" fill="${lt}"/>`;
-  s += `<path d="M26 52 v13 M38 52 v13" stroke="${OL}" stroke-width="1.4" stroke-linecap="round"/><ellipse cx="26" cy="66" rx="4.2" ry="2.4" fill="${lt}" ${ST}/><ellipse cx="38" cy="66" rx="4.2" ry="2.4" fill="${lt}" ${ST}/>`;
-  s += `<path d="M20 47 l4 1 M19 52 l4 .5 M44 47 l-4 1" stroke="${c2}" stroke-width="1.6" stroke-linecap="round"/>`;
-  s += `<path d="M19.5 24 L17 8 L29.5 16Z" fill="${c}" ${ST}/><path d="M21 20 L19.6 12 L26 16.4Z" fill="${pk}"/><path d="M44.5 24 L47 8 L34.5 16Z" fill="${c}" ${ST}/><path d="M43 20 L44.4 12 L38 16.4Z" fill="${pk}"/>`;
-  s += `<path d="M17 29 C17 20 24 15 32 15 C40 15 47 20 47 29 C47 37 40 41 32 41 C24 41 17 37 17 29Z" fill="${c}" ${ST}/>`;
-  s += `<path d="M29 17 v4 M32 16.5 v5 M35 17 v4" stroke="${c2}" stroke-width="1.6" stroke-linecap="round"/>`;
-  s += `<ellipse cx="32" cy="34" rx="6.5" ry="4.5" fill="${lt}"/>`;
-  s += eyes([[25.5, 28], [38.5, 28]], mood) + blush([[21, 33], [43, 33]]);
-  s += `<path d="M30.6 31.6 h2.8 l-1.4 1.6z" fill="#E77F9C" stroke="#E77F9C" stroke-width="1" stroke-linejoin="round"/><path d="M29.4 34.4 q1.3 1.4 2.6 0 q1.3 1.4 2.6 0" fill="none" stroke="${OL}" stroke-width="1.3" stroke-linecap="round"/>`;
-  s += `<path d="M10 31 l8 1.4 M10.5 35.5 l7.5 -1 M54 31 l-8 1.4 M53.5 35.5 l-7.5 -1" stroke="${OL}" stroke-width=".9" stroke-linecap="round" opacity=".6"/>`;
+  const c = "#AEB6C7", c2 = "#8892A6", lt = "#EEF0F5", pk = "#EFB4C3";
+  let s = `<path d="M44 65 C57 65 59 52 55 44 C53 40 50 41 51 45 C54 53 50 60 42 60Z" fill="${c}" ${ST}/>`;
+  s += `<path d="M19 26 L17 10 L29 17Z" fill="${c}" ${ST}/><path d="M20.5 22 L19.5 13.5 L25.5 17Z" fill="${pk}"/><path d="M45 26 L47 10 L35 17Z" fill="${c}" ${ST}/><path d="M43.5 22 L44.5 13.5 L38.5 17Z" fill="${pk}"/>`;
+  const d = "M18 30 C18 20 24 15 32 15 C40 15 46 20 46 30 C46 34 45 36 43 38 C48 46 50 58 47 66.5 L17 66.5 C14 58 16 46 21 38 C19 36 18 34 18 30Z";
+  s += blob(d, c, `<path d="M28.5 16 v4 M32 15.5 v5 M35.5 16 v4" stroke="${c2}" stroke-width="1.8" stroke-linecap="round"/><ellipse cx="32" cy="35.5" rx="7" ry="4.6" fill="${lt}"/><path d="M27 42 C25 52 27 60 32 62 C37 60 39 52 37 42Z" fill="${lt}"/><path d="M15 48 l5 1 M15 53 l5 .5 M49 48 l-5 1 M49 53 l-5 .5" stroke="${c2}" stroke-width="2" stroke-linecap="round"/><path d="M27 59 v8 M37 59 v8" stroke="${OL}" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>`);
+  s += eyes([[25.5, 29], [38.5, 29]], mood) + blush([[21, 34], [43, 34]]) + `<path d="M30.8 32.6 h2.4 l-1.2 1.3z" fill="#E58AA3" stroke="#E58AA3" stroke-width="1" stroke-linejoin="round"/>` + mouth(32, 35.6);
   return s;
 }
 function mothArt(mood){
-  const w = "#D9CCF4", w2 = "#A98BD6", fz = "#F3EEFB";
-  const half = `<path d="M30 34 C19 15 2 17 3.5 31 C5 42 18 45 30 40Z" fill="${w}" ${ST}/><path d="M30 41 C21 45 12 54 17 62 C23 66 30 55 31 46Z" fill="${w2}" ${ST}/><circle cx="14" cy="29" r="5" fill="#FFF6B3" ${ST}/><circle cx="14" cy="29" r="2" fill="${w2}"/><path d="M7 37 q8 2 17 0" fill="none" stroke="${w2}" stroke-width="1.4" stroke-linecap="round"/><circle cx="21" cy="55" r="2.2" fill="#FFF6B3"/>`
-    + `<path d="M29 21 C26 14 22 9 18 6" fill="none" stroke="${OL}" stroke-width="1.5" stroke-linecap="round"/>` + [[26, 15], [23.5, 11.5], [21, 8.5]].map(([x, y]) => `<path d="M${x} ${y} l-3.2 1.4 M${x} ${y} l.6 -3.4" stroke="${OL}" stroke-width="1.1" stroke-linecap="round"/>`).join("");
+  const w = "#DED2F5", w2 = "#B8A3E2", fz = "#F6F2FC";
+  const half = `<path d="M29 34 C19 15 3 17 4 31 C5 42 18 45 29 41Z" fill="${w}" ${ST}/><circle cx="14" cy="30" r="4.4" fill="#FFF6C6"/><circle cx="14" cy="30" r="1.8" fill="${w2}"/><path d="M29 42 C21 45 12 54 17 62 C23 66 30 55 31 46Z" fill="${w2}" ${ST}/><circle cx="20" cy="56" r="2" fill="#FFF6C6"/>`
+    + `<path d="M28.5 22 C26 15 22 10 18 7" fill="none" stroke="${OL}" stroke-width="1.6" stroke-linecap="round"/>` + [[25.5, 15.5], [23, 12], [20.5, 9]].map(([x, y]) => `<path d="M${x} ${y} l-3 1.3 M${x} ${y} l.5 -3.2" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/>`).join("");
   let s = half + `<g transform="translate(64 0) scale(-1 1)">${half}</g>`;
-  s += `<ellipse cx="32" cy="50" rx="7" ry="14" fill="${w2}" ${ST}/><path d="M26 47 q6 2 12 0 M26 52 q6 2 12 0 M27 57 q5 2 10 0" fill="none" stroke="#8E70CF" stroke-width="1.2"/>`;
-  s += [[24, 36], [28, 39], [32, 40], [36, 39], [40, 36]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="${fz}" ${ST}/>`).join("");
-  s += `<circle cx="32" cy="28" r="9.5" fill="${fz}" ${ST}/>`;
-  if (mood === "dot") s += `<ellipse cx="28" cy="28" rx="3.2" ry="3.6" fill="${OL}"/><ellipse cx="36" cy="28" rx="3.2" ry="3.6" fill="${OL}"/><circle cx="29.2" cy="26.6" r="1.2" fill="#fff"/><circle cx="37.2" cy="26.6" r="1.2" fill="#fff"/>`;
-  else s += eyes([[28, 28], [36, 28]], mood);
-  s += blush([[25, 32.5], [39, 32.5]]) + `<path d="M30.6 32.6 q1.4 1.2 2.8 0" fill="none" stroke="${OL}" stroke-width="1.2" stroke-linecap="round"/>`;
+  const d = "M32 19 C40 19 44 25 44 33 C44 46 40 60 32 62 C24 60 20 46 20 33 C20 25 24 19 32 19Z";
+  s += blob(d, fz, `<path d="M18 44 q3.5 -4 7 0 q3.5 -4 7 0 q3.5 -4 7 0 q3.5 -4 7 0 V70 H18Z" fill="${w2}"/><path d="M22 52 q10 3 20 0 M23 58 q9 3 18 0" fill="none" stroke="#8E70CF" stroke-width="1.3"/>`);
+  s += eyes([[27.5, 31], [36.5, 31]], mood) + blush([[24.5, 36], [39.5, 36]]) + `<path d="M30.6 35.4 q1.4 1.2 2.8 0" fill="none" stroke="${OL}" stroke-width="1.3" stroke-linecap="round"/>`;
   return s;
 }
 function critterSVG(sp, opts = {}){
   const mood = opts.mood || "dot", o = opts.outfit || {};
   const art = { bunny: () => bunnyArt(mood, o), duck: () => duckArt(mood), bird: () => birdArt(mood), fox: () => foxArt(mood), frog: () => frogArt(mood), bear: () => bearArt(mood), cat: () => catArt(mood), moth: () => mothArt(mood) }[sp] || (() => catArt(mood));
-  return `<svg viewBox="0 0 64 70" aria-hidden="true">${art()}</svg>`;
+  return `<svg viewBox="0 0 64 70" aria-hidden="true">${WOB}<g filter="url(#wob)">${art()}</g></svg>`;
 }
-
 /* ---------- SVG UI icons (no emoji) ---------- */
 const UI = {};
 const svgI = (body, vb = "0 0 32 32") => `<svg viewBox="${vb}" aria-hidden="true">${body}</svg>`;
